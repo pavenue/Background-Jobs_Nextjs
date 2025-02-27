@@ -3,36 +3,34 @@ import csv from "csv-parser";
 import fs from "fs";
 import axios from "axios";
 import path from "path";
-import { userQueue } from "./lib/queue.js"; // ✅ Ensure correct file extension
+import dotenv from "dotenv";
 
-// import dotenv from "dotenv";
-	
-// dotenv.config();
+dotenv.config();
+
 // ✅ Ensure environment variables are correctly set
-// if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
-//   console.error("❌ Missing REDIS_HOST or REDIS_PORT" );
-//   process.exit(1);
-// }
+if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
+  console.error("❌ ERROR: Missing REDIS_HOST or REDIS_PORT in .env file.");
+  process.exit(1);
+}
 
 // ✅ Parse Redis Port safely
 const redisPort = parseInt(process.env.REDIS_PORT, 10);
-console.log(process.env.REDIS_HOST, process.env.REDIS_PORT)
-// if (isNaN(redisPort) || redisPort <= 0 || redisPort > 65535) {
-//   console.error("❌ Invalid REDIS_PORT in .env. Must be a number between 1 and 65535.");
-//   process.exit(1);
-// }
+if (isNaN(redisPort) || redisPort <= 0 || redisPort > 65535) {
+  console.error(`❌ ERROR: Invalid REDIS_PORT: "${process.env.REDIS_PORT}". Must be a number between 1 and 65535.`);
+  process.exit(1);
+}
 
-console.log(`redis port, ${redisPort}`)
-console.log(typeof(redisPort))
+console.log(`🔗 Connecting to Redis at ${process.env.REDIS_HOST}:${redisPort}`);
+
 const connection = { 
   host: process.env.REDIS_HOST, 
-  port: parseInt(process.env.REDIS_PORT, 10) 
+  port: redisPort 
 };
 
 console.log("🚀 Worker is running and waiting for jobs...");
 
 const worker = new Worker(
-  process.env.WORKER_QUEUE_NAME || "userQueue", // ✅ Ensures the queue name is set
+  process.env.WORKER_QUEUE_NAME || "userQueue", // ✅ Ensure queue name is set
   async (job) => {
     const filePath = path.join(process.cwd(), process.env.UPLOAD_DIR, job.data.filename);
     console.log(`⚡ Processing CSV file: ${filePath}`);
