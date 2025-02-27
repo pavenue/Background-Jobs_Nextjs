@@ -12,13 +12,13 @@ const connection = {
   port: parseInt(process.env.REDIS_PORT, 10) 
 };
 
-console.log("🚀 Worker is running and waiting for jobs...");
+console.log(" Worker is running and waiting for jobs...");
 
 const worker = new Worker(
   process.env.WORKER_QUEUE_NAME || "userQueue",
   async (job) => {
     const filePath = path.join(process.cwd(), process.env.UPLOAD_DIR, job.data.filename);
-    console.log(`⚡ Processing CSV file: ${filePath}`);
+    console.log(` Processing CSV file: ${filePath}`);
 
     const users = [];
 
@@ -29,11 +29,11 @@ const worker = new Worker(
           if (row.name && row.email) {
             users.push(row);
           } else {
-            console.error("❌ Invalid row:", row);
+            console.error(" Invalid row:", row);
           }
         })
         .on("end", async () => {
-          console.log(`✅ Parsed ${users.length} users. Sending to API...`);
+          console.log(` Parsed ${users.length} users. Sending to API...`);
 
           try {
             await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/progress`, {
@@ -41,9 +41,9 @@ const worker = new Worker(
               users,
             });
 
-            console.log("✅ Parsed data sent to frontend");
+            console.log("Parsed data sent to frontend");
           } catch (error) {
-            console.error("❌ Failed to send parsed data:", error.message);
+            console.error(" Failed to send parsed data:", error.message);
           }
 
           resolve();
@@ -55,9 +55,9 @@ const worker = new Worker(
 );
 
 worker.on("completed", (job) => {
-  console.log(`✅ Job completed: ${job.id}`);
+  console.log(` Job completed: ${job.id}`);
 });
 
 worker.on("failed", (job, err) => {
-  console.error(`❌ Job failed: ${job.id}`, err);
+  console.error(`Job failed: ${job.id}`, err);
 });

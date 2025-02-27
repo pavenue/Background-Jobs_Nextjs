@@ -7,7 +7,6 @@ export default function Home() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [parsedData, setParsedData] = useState(null);
 
-  // ✅ Fetch parsed data periodically
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -17,9 +16,9 @@ export default function Home() {
           setParsedData(data);
         }
       } catch (error) {
-        console.error("❌ Error fetching parsed data:", error);
+        console.error(" Error fetching parsed data:", error);
       }
-    }, 5000); // ✅ Poll every 5 seconds
+    }, 5000); 
 
     return () => clearInterval(interval);
   }, []);
@@ -28,7 +27,7 @@ export default function Home() {
     event.preventDefault();
 
     if (!file) {
-      alert("❌ Please select a CSV file");
+      alert(" Please select a CSV file");
       return;
     }
 
@@ -47,10 +46,10 @@ export default function Home() {
       }
 
       const result = await response.json();
-      console.log("✅ Success:", result);
+      console.log("Success:", result);
       setIsSuccess(true);
     } catch (error) {
-      console.error("❌ Upload Error:", error.message);
+      console.error("Upload Error:", error.message);
       alert(`Error: ${error.message}`);
     }
   }
@@ -81,7 +80,7 @@ export default function Home() {
       {isSuccess && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-bold text-green-600">✅ Success!</h3>
+            <h3 className="text-lg font-bold text-green-600"> Success!</h3>
             <p className="text-gray-600">Your CSV file has been uploaded successfully.</p>
             <button
               onClick={() => setIsSuccess(false)}
@@ -93,7 +92,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ✅ Show parsed data after processing */}
       {parsedData && (
         <div className="bg-white p-6 shadow-md rounded-lg mt-6 w-96">
           <h3 className="text-lg font-bold text-gray-800">📊 Parsed Data:</h3>
