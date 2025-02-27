@@ -2,29 +2,14 @@ import { Worker } from "bullmq";
 import csv from "csv-parser";
 import fs from "fs";
 import axios from "axios";
-import path from "path";
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config(); // ✅ This is ignored in Railway but needed for local dev
-
-// ✅ Ensure required environment variables are set
-if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
-  console.error("❌ ERROR: Missing REDIS_HOST or REDIS_PORT in Railway variables.");
-  process.exit(1);
-}
-
-// ✅ Parse Redis Port safely
-const redisPort = parseInt(process.env.REDIS_PORT, 10);
-if (isNaN(redisPort) || redisPort <= 0 || redisPort > 65535) {
-  console.error(`❌ ERROR: Invalid REDIS_PORT: "${process.env.REDIS_PORT}". Must be a number between 1 and 65535.`);
-  process.exit(1);
-}
-
-console.log(`🔗 Connecting to Redis at ${process.env.REDIS_HOST}:${redisPort}`);
+dotenv.config();
 
 const connection = { 
   host: process.env.REDIS_HOST, 
-  port: redisPort
+  port: parseInt(process.env.REDIS_PORT, 10) 
 };
 
 console.log("🚀 Worker is running and waiting for jobs...");
@@ -50,16 +35,17 @@ const worker = new Worker(
         .on("end", async () => {
           console.log(`✅ Parsed ${users.length} users. Sending to API...`);
 
-          for (const user of users) {
-            try {
-              await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users`, user);
-              console.log(`📤 Sent: ${user.email}`);
-            } catch (error) {
-              console.error(`❌ Failed to send ${user.email}:`, error.message);
-            }
+          try {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/progress`, {
+              status: "completed",
+              users,
+            });
+
+            console.log("✅ Parsed data sent to frontend");
+          } catch (error) {
+            console.error("❌ Failed to send parsed data:", error.message);
           }
 
-          console.log("✅ CSV processing complete!");
           resolve();
         })
         .on("error", reject);
