@@ -5,7 +5,6 @@ import axios from "axios";
 import path from "path";
 import { userQueue } from "./lib/queue.js"; // ✅ Ensure correct file extension
 
-dotenv.config();
 
 // ✅ Ensure environment variables are correctly set
 if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {

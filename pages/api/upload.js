@@ -4,8 +4,6 @@ import fs from "fs/promises";
 import { userQueue } from "../../lib/queue";
 
 
-dotenv.config();
-
 export const config = {
   api: {
     bodyParser: false, 
