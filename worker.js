@@ -2,15 +2,22 @@ import { Worker } from "bullmq";
 import csv from "csv-parser";
 import fs from "fs";
 import axios from "axios";
+import dotenv from "dotenv";
+import path from "path";
 
-const connection = { host: "127.0.0.1", port: 6379 };
+dotenv.config();
+
+const connection = { 
+  host: process.env.REDIS_HOST, 
+  port: parseInt(process.env.REDIS_PORT, 10) 
+};
 
 console.log(" Worker is running and waiting for jobs...");
 
 const worker = new Worker(
-  "userQueue",
+  process.env.WORKER_QUEUE_NAME,
   async (job) => {
-    const { filePath } = job.data;
+    const filePath = path.join(process.cwd(), process.env.UPLOAD_DIR, job.data.filename);
     console.log(` Processing CSV file: ${filePath}`);
 
     const users = [];
@@ -26,11 +33,11 @@ const worker = new Worker(
           }
         })
         .on("end", async () => {
-          console.log(`Parsed ${users.length} users. Sending to API...`);
+          console.log(` Parsed ${users.length} users. Sending to API...`);
 
           for (const user of users) {
             try {
-              await axios.post("http://localhost:3000/api/users", user);
+              await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users`, user);
               console.log(`📤 Sent: ${user.email}`);
             } catch (error) {
               console.error(` Failed to send ${user.email}:`, error.message);

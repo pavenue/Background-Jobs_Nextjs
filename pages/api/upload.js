@@ -2,6 +2,9 @@ import multer from "multer";
 import path from "path";
 import fs from "fs/promises";
 import { userQueue } from "../../lib/queue";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const config = {
   api: {
@@ -9,18 +12,16 @@ export const config = {
   },
 };
 
-
-const uploadDir = path.join(process.cwd(), "public/uploads");
+const uploadDir = path.join(process.cwd(), process.env.UPLOAD_DIR);
 
 async function ensureUploadDir() {
   try {
     await fs.mkdir(uploadDir, { recursive: true });
-    console.log("Upload directory ensured:", uploadDir);
+    console.log(" Upload directory ensured:", uploadDir);
   } catch (error) {
-    console.error("Error creating upload directory:", error);
+    console.error(" Error creating upload directory:", error);
   }
 }
-
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -30,7 +31,6 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
-
 
 const upload = multer({ storage });
 
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
   upload.single("csvfile")(req, res, async (err) => {
     if (err) {
-      console.error("Multer Error:", err);
+      console.error(" Multer Error:", err);
       return res.status(500).json({ error: "File upload failed" });
     }
 
@@ -54,10 +54,10 @@ export default async function handler(req, res) {
 
     try {
       const filePath = path.join(uploadDir, req.file.filename);
-      console.log("File received and saved at:", filePath);
+      console.log(" File received and saved at:", filePath);
 
       
-      await userQueue.add("processCsv", { filePath });
+      await userQueue.add("processCsv", { filename: req.file.filename });
 
       res.status(200).json({ message: "File uploaded successfully and added to queue." });
     } catch (error) {
