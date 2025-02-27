@@ -16,10 +16,11 @@ import { userQueue } from "./lib/queue.js"; // ✅ Ensure correct file extension
 
 // ✅ Parse Redis Port safely
 const redisPort = parseInt(process.env.REDIS_PORT, 10);
-if (isNaN(redisPort) || redisPort <= 0 || redisPort > 65535) {
-  console.error("❌ Invalid REDIS_PORT in .env. Must be a number between 1 and 65535.");
-  process.exit(1);
-}
+console.log(process.env.REDIS_HOST, process.env.REDIS_PORT)
+// if (isNaN(redisPort) || redisPort <= 0 || redisPort > 65535) {
+//   console.error("❌ Invalid REDIS_PORT in .env. Must be a number between 1 and 65535.");
+//   process.exit(1);
+// }
 
 console.log(`redis port, ${redisPort}`)
 console.log(typeof(redisPort))
