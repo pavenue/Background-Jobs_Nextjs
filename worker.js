@@ -5,11 +5,11 @@ import axios from "axios";
 import path from "path";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config(); // ✅ This is ignored in Railway but needed for local dev
 
-// ✅ Ensure environment variables are correctly set
+// ✅ Ensure required environment variables are set
 if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
-  console.error("❌ ERROR: Missing REDIS_HOST or REDIS_PORT in .env file.");
+  console.error("❌ ERROR: Missing REDIS_HOST or REDIS_PORT in Railway variables.");
   process.exit(1);
 }
 
@@ -24,13 +24,13 @@ console.log(`🔗 Connecting to Redis at ${process.env.REDIS_HOST}:${redisPort}`
 
 const connection = { 
   host: process.env.REDIS_HOST, 
-  port: redisPort 
+  port: redisPort
 };
 
 console.log("🚀 Worker is running and waiting for jobs...");
 
 const worker = new Worker(
-  process.env.WORKER_QUEUE_NAME || "userQueue", // ✅ Ensure queue name is set
+  process.env.WORKER_QUEUE_NAME || "userQueue",
   async (job) => {
     const filePath = path.join(process.cwd(), process.env.UPLOAD_DIR, job.data.filename);
     console.log(`⚡ Processing CSV file: ${filePath}`);
