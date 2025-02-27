@@ -5,12 +5,14 @@ import axios from "axios";
 import path from "path";
 import { userQueue } from "./lib/queue.js"; // ✅ Ensure correct file extension
 
-
+// import dotenv from "dotenv";
+	
+// dotenv.config();
 // ✅ Ensure environment variables are correctly set
-if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
-  console.error("❌ Missing REDIS_HOST or REDIS_PORT in .env file");
-  process.exit(1);
-}
+// if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
+//   console.error("❌ Missing REDIS_HOST or REDIS_PORT" );
+//   process.exit(1);
+// }
 
 // ✅ Parse Redis Port safely
 const redisPort = parseInt(process.env.REDIS_PORT, 10);
