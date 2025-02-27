@@ -4,21 +4,37 @@ import fs from "fs";
 import axios from "axios";
 import dotenv from "dotenv";
 import path from "path";
+import { userQueue } from "./lib/queue.js"; // ✅ Ensure correct file extension
 
 dotenv.config();
 
+// ✅ Ensure environment variables are correctly set
+if (!process.env.REDIS_HOST || !process.env.REDIS_PORT) {
+  console.error("❌ Missing REDIS_HOST or REDIS_PORT in .env file");
+  process.exit(1);
+}
+
+// ✅ Parse Redis Port safely
+const redisPort = parseInt(process.env.REDIS_PORT, 10);
+if (isNaN(redisPort) || redisPort <= 0 || redisPort > 65535) {
+  console.error("❌ Invalid REDIS_PORT in .env. Must be a number between 1 and 65535.");
+  process.exit(1);
+}
+
+console.log(`redis port, ${redisPort}`)
+console.log(typeof(redisPort))
 const connection = { 
   host: process.env.REDIS_HOST, 
-  port: parseInt(process.env.REDIS_PORT, 10) 
+ // port: parseInt(process.env.REDIS_PORT, 10) 
 };
 
-console.log(" Worker is running and waiting for jobs...");
+console.log("🚀 Worker is running and waiting for jobs...");
 
 const worker = new Worker(
-  process.env.WORKER_QUEUE_NAME,
+  process.env.WORKER_QUEUE_NAME || "userQueue", // ✅ Ensures the queue name is set
   async (job) => {
     const filePath = path.join(process.cwd(), process.env.UPLOAD_DIR, job.data.filename);
-    console.log(` Processing CSV file: ${filePath}`);
+    console.log(`⚡ Processing CSV file: ${filePath}`);
 
     const users = [];
 
@@ -29,22 +45,22 @@ const worker = new Worker(
           if (row.name && row.email) {
             users.push(row);
           } else {
-            console.error(" Invalid row:", row);
+            console.error("❌ Invalid row:", row);
           }
         })
         .on("end", async () => {
-          console.log(` Parsed ${users.length} users. Sending to API...`);
+          console.log(`✅ Parsed ${users.length} users. Sending to API...`);
 
           for (const user of users) {
             try {
               await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users`, user);
               console.log(`📤 Sent: ${user.email}`);
             } catch (error) {
-              console.error(` Failed to send ${user.email}:`, error.message);
+              console.error(`❌ Failed to send ${user.email}:`, error.message);
             }
           }
 
-          console.log(" CSV processing complete!");
+          console.log("✅ CSV processing complete!");
           resolve();
         })
         .on("error", reject);
@@ -54,9 +70,9 @@ const worker = new Worker(
 );
 
 worker.on("completed", (job) => {
-  console.log(` Job completed: ${job.id}`);
+  console.log(`✅ Job completed: ${job.id}`);
 });
 
 worker.on("failed", (job, err) => {
-  console.error(` Job failed: ${job.id}`, err);
+  console.error(`❌ Job failed: ${job.id}`, err);
 });
