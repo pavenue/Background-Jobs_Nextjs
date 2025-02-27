@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs/promises";
 import { userQueue } from "../../lib/queue";
-import dotenv from "dotenv";
+
 
 dotenv.config();
 

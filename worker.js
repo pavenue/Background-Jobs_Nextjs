@@ -2,7 +2,6 @@ import { Worker } from "bullmq";
 import csv from "csv-parser";
 import fs from "fs";
 import axios from "axios";
-import dotenv from "dotenv";
 import path from "path";
 import { userQueue } from "./lib/queue.js"; // ✅ Ensure correct file extension
 
@@ -25,7 +24,7 @@ console.log(`redis port, ${redisPort}`)
 console.log(typeof(redisPort))
 const connection = { 
   host: process.env.REDIS_HOST, 
- // port: parseInt(process.env.REDIS_PORT, 10) 
+  port: parseInt(process.env.REDIS_PORT, 10) 
 };
 
 console.log("🚀 Worker is running and waiting for jobs...");
